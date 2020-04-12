@@ -1,0 +1,10 @@
+{
+	"author": "openface",
+	"version": "0.0.1",
+	"client_scripts": [],
+	"server_scripts": [
+		"dbm.lua",
+		"table.lua"
+	],
+	"files": []
+}
