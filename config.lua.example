@@ -1,0 +1,12 @@
+--
+-- DBM Configuration
+--
+DBM_HOST = "localhost"
+DBM_PORT = 3306
+DBM_USERNAME = "root"
+DBM_PASSWORD = "password"
+DBM_DATABASE = "orp"
+DBM_CHARSET = "utf8mb4"
+
+DBM_LOGLEVEL = "debug"
+DBM_DEBUG = true
