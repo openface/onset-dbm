@@ -1,20 +1,20 @@
-= DBM: Database Manager for Onset
+# DBM: Database Manager for Onset
 
 A simple lightweight library for handling CRUD operations to your database.
 
-== Import DBM Package
+## Import DBM Package
 
 ```
 DBM = ImportPackage("dbm")
 ```
 
-== Configure Database
+## Configure Database
 
 Copy the `config.lua.example` file and name it `config.lua`.  Edit it to provide
 your database credentials.   The database MUST already exist.  DBM can create the
 table schemas for you, but not the database.
 
-== Initialize/Create Table
+## Initialize/Create Table
 
 ```
 DBM.InitTable(<table_name>, <fields>, [<force_recreate>])
@@ -36,17 +36,21 @@ Note, `force_recreate` defaults to false if omitted.
 
 TODO: document data types
 
-== Insert Row
+## Insert Row
 
-== Update Row
+```
+DBM.InsertTable("users", { username = 'nick', password = 'bill', age = 25 })
+```
 
-== Delete Row
+## Update Row
 
-== Fetch Rows
+## Delete Row
 
-== Fetch Single Row
+## Fetch Rows
 
-= TODO
+## Fetch Single Row
+
+# TODO
 
 * Auto-generate primary key (id)
 * Auto-generate timestamps (created_at, updated_at)
