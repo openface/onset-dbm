@@ -2,17 +2,17 @@
 
 A simple lightweight library for handling CRUD operations to your database.
 
+## Configure Database Settings
+
+Copy the `config.lua.example` file and name it `config.lua`.  Edit it to provide
+your database credentials.   The database MUST already exist.  DBM can create the
+table schemas for you, but not the database.
+
 ## Import DBM Package
 
 ```
 DBM = ImportPackage("dbm")
 ```
-
-## Configure Database
-
-Copy the `config.lua.example` file and name it `config.lua`.  Edit it to provide
-your database credentials.   The database MUST already exist.  DBM can create the
-table schemas for you, but not the database.
 
 ## Initialize/Create Table
 
