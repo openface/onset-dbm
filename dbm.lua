@@ -24,15 +24,6 @@ local function OnPackageStop()
 end
 AddEvent("OnPackageStop", OnPackageStop)
 
-local function OnQueryError(errorid, error_str, query_str, handle_id)
-    print "Database Query Error!"
-    print("Error ID: "..errorid)
-    print("Error: "..error_str)
-    print("Query: "..query_str)
-    print("HandleID: "..handle_id)
-end
-AddEvent("OnQueryError", OnQueryError)
-
 --
 -- Tables
 --
@@ -52,8 +43,8 @@ function InsertRow(name, params)
 end
 AddFunctionExport("InsertRow", InsertRow)
 
-function UpdateRows(name, where, params)
-    return Tables[name].update(where, params)
+function UpdateRows(name, params, where)
+    return Tables[name].update(params, where)
 end
 AddFunctionExport("UpdateRows", UpdateRows)
 
@@ -80,7 +71,7 @@ function FormatDataType(type)
     end
 end
 
--- Handles NULL strings for char types and quotes for SQL
+-- Handles NULL strings and quotes for SQL statements
 function FormatValue(value, field)
     if field.type == "char" or field.type == "text" or field.type == "datetime" then
         if value == nil and field.null ~= false then
@@ -89,7 +80,12 @@ function FormatValue(value, field)
             return "'" .. tostring(value) .. "'"
         end
     else
-        return value
+        -- integers
+        if value == nil then
+            return "NULL"
+        else 
+            return value
+        end
     end
 end
 

@@ -23,13 +23,14 @@ DBM.InitTable(<table_name>, <fields>, [<force_recreate>])
 Example:
 ```
 DBM.InitTable("users", {
-	username = {type = 'char', max_length = 100, unique = true},
-	password = {type = 'char', max_length = 50, unique = true},
-	age = {type = 'number', max_length = 2 },
-	job = {type = 'char', max_length = 50, null = true, default = 'foo'},
-	description = {type = 'text', null = true },
-	time_create = {type = 'datetime', null = true}
-})
+	steamid = { type = 'number', max_length = 50, unique = true },
+	username = { type = 'char', max_length = 100 },
+	password = { type = 'char', max_length = 50 },
+	age = { type = 'number', max_length = 2 },
+	job = { type = 'char', max_length = 50, null = true, default = 'foo'},
+	description = { type = 'text', null = true },
+	registered_at = { type = 'datetime', null = true }
+}, true)
 ```
 
 Note, the `force_recreate` is optional and defaults to false.
@@ -46,8 +47,9 @@ Note, the `force_recreate` is optional and defaults to false.
 ## Insert Row
 
 ```
-#
-DBM.InsertRow("users", { username = 'nick', password = 'bill', age = 25 })
+DBM.InsertRow("users", { steamid = 9876543210, username = 'oweff', password = 'dontknow', age = 25 })
+
+# INSERT INTO `users` (`job`, `password`, `username`, `description`, `age`, `steamid`, `registered_at`) VALUES (NULL, 'dontknow', 'oweff', NULL, 25, 1286608618, NULL)
 ```
 
 ## Update Rows
@@ -58,24 +60,15 @@ DBM.UpdateRows(<table_name>, <params>, <where>)
 
 Example:
 ```
-# UPDATE users SET age = 25, steamid = 1234567890 WHERE (password = 'password1' AND age = 28)
+DBM.UpdateRows("users", { steamid = 9876543210 }, { age = 28, password = 'password1' })
 
-DBM.UpdateRow("users", { steamid = 1234567890, age = 25 }, { age = 28, password = 'password1' })
-
+# UPDATE users SET steamid = 1286608618 WHERE (password = 'password1' AND age = 28)
 ```
 
-## Delete Row
+## Delete Rows
 
 ## Fetch Rows
 
-```
-#
-DBM.Select()
-```
-
-## Fetch Single Row
-
 # TODO
 
-* Auto-generate primary key (id)
-* Auto-generate timestamps (created_at, updated_at)
+* Query builder to support more operators (AND, OR, LIKE, EQ, GT, LT)
