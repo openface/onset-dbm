@@ -48,6 +48,14 @@ function UpdateRows(name, params, where)
 end
 AddFunctionExport("UpdateRows", UpdateRows)
 
+function SelectRows(name, fields, where, callback)
+    print "YO"
+    print(callback)
+
+    return Tables[name].select(fields, where, callback)
+end
+AddFunctionExport("SelectRows", SelectRows)
+
 
 --
 

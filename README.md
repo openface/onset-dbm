@@ -2,6 +2,8 @@
 
 A simple lightweight library for handling CRUD operations in your database.
 
+NOTE: This is a proof of concept only - NOT recommended for actual game servers.
+
 ## Configure Database Settings
 
 Copy the `config.lua.example` file and name it `config.lua`.  Edit it to provide
