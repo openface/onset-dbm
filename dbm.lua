@@ -52,10 +52,10 @@ function InsertRow(name, params)
 end
 AddFunctionExport("InsertRow", InsertRow)
 
-function UpdateRow(name, params)
-    return Tables[name].update(params)
+function UpdateRows(name, where, params)
+    return Tables[name].update(where, params)
 end
-AddFunctionExport("UpdateRow", UpdateRow)
+AddFunctionExport("UpdateRows", UpdateRows)
 
 
 --
@@ -64,7 +64,6 @@ function FormatDateTime(time)
     return os.date("%Y-%m-%d %H:%M:%S", time)
 end
 AddFunctionExport("FormatDateTime", FormatDateTime)
-
 
 function FormatDataType(type)
     if type == "number" then
@@ -81,9 +80,14 @@ function FormatDataType(type)
     end
 end
 
-function QuoteValue(value, type)
-    if type == "char" or type == "text" or type == "datetime" then
-        return "'" .. value .. "'"
+-- Handles NULL strings for char types and quotes for SQL
+function FormatValue(value, field)
+    if field.type == "char" or field.type == "text" or field.type == "datetime" then
+        if value == nil and field.null ~= false then
+            return "NULL"
+        else
+            return "'" .. tostring(value) .. "'"
+        end
     else
         return value
     end

@@ -1,6 +1,6 @@
 # DBM: Database Manager for Onset
 
-A simple lightweight library for handling CRUD operations to your database.
+A simple lightweight library for handling CRUD operations in your database.
 
 ## Configure Database Settings
 
@@ -46,14 +46,32 @@ Note, the `force_recreate` is optional and defaults to false.
 ## Insert Row
 
 ```
+#
 DBM.InsertRow("users", { username = 'nick', password = 'bill', age = 25 })
 ```
 
-## Update Row
+## Update Rows
+
+```
+DBM.UpdateRows(<table_name>, <params>, <where>)
+```
+
+Example:
+```
+# UPDATE users SET age = 25, steamid = 1234567890 WHERE (password = 'password1' AND age = 28)
+
+DBM.UpdateRow("users", { steamid = 1234567890, age = 25 }, { age = 28, password = 'password1' })
+
+```
 
 ## Delete Row
 
 ## Fetch Rows
+
+```
+#
+DBM.Select()
+```
 
 ## Fetch Single Row
 

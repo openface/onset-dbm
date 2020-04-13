@@ -53,7 +53,7 @@ function Table.new(conn, name, fields)
             end
 
             if field.default ~= nil then
-                column_query = column_query .. " DEFAULT(" .. QuoteValue(field.default, field.type) ..")"
+                column_query = column_query .. " DEFAULT(" .. FormatValue(field.default, field) ..")"
             end
 
             if field.unique ~= nil then
@@ -62,7 +62,11 @@ function Table.new(conn, name, fields)
 
             create_query = create_query .. column_query .. ","
         end
-        create_query = create_query .. "\nPRIMARY KEY (id)\n)"
+
+        -- automatic timestamps on create/update (Requires MySQL 5.6)
+        create_query = create_query .. "\n`created_at` TIMESTAMP NOT NULL DEFAULT NOW(),"
+        create_query = create_query .. "\n`updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),"
+        create_query = create_query .. "\nPRIMARY KEY (`id`)\n)"
 
         local query = mariadb_prepare(self.conn, create_query)
         mariadb_query(self.conn, query)
@@ -84,10 +88,10 @@ function Table.new(conn, name, fields)
         local value
         for column,field in pairs(self.fields) do
             colname = column
-            value = params[column] or "NULL"
+            value = params[column]
 
             if ValidateField(value, field) then
-                value = QuoteValue(value, field.type)
+                value = FormatValue(value, field)
             else
                 print("Wrong type for table "..self.name.." in column "..colname)
                 return false
@@ -109,18 +113,83 @@ function Table.new(conn, name, fields)
 
         local query = mariadb_prepare(self.conn, insert_query)
         local result = mariadb_query(self.conn, query)
-        return mariadb_get_insert_id()
+        return true
     end
 
     --
     -- UPDATE 
     --    
-    self.update = function(params)
+    self.update = function(params, where)
         print("updating row "..self.name)
+        print(dump(where))
         print(dump(params))
+
+        local update_query = "UPDATE "..self.name.." SET "
+        local counter = 0
+
+        for column,value in pairs(params) do
+            if counter ~= 0 then
+                update_query = update_query .. ", "
+            end
+
+            if type(value) ~= "number" then
+                value = "'"..value.."'"
+            end
+
+            update_query = update_query .. column ..' = '..value
+            counter = counter + 1
+        end
+
+        -- append where clause
+        update_query = update_query .. " " .. self._where(where)
+
+        local query = mariadb_prepare(self.conn, update_query)
+        local result = mariadb_query(self.conn, query)
         return true
+    end
+
+    -- @param fields    "id,name,dob"
+    -- @param where     { age = 25 }
+    -- @param callback  function
+    self.select = function(fields, where, callback)
+        local select_query = "SELECT "..fields.." FROM "..self.name
+
+        -- append where clause
+        select_query = select_query .. " " .. self._where(where)
+
+        local query = mariadb_prepare(self.conn, select_query)
+        local result = mariadb_query(self.conn, query, callback)
+        return true
+    end
+
+    -- builds a where clause
+    -- TODO: support more operators
+    self._where = function(where)
+        print "WHERE"
+        print(dump(where))
+        local where_clause = "WHERE ("
+        local counter = 0
+        local condition = ""
+        local equation
+
+        for column,value in pairs(where) do
+
+            if type(value) ~= "number" then
+                value = "'"..value.."'"
+            end
+
+            equation = column .. ' = ' .. value
+
+            if counter ~= 0 then
+                equation = " AND "..equation
+            end
+
+            condition = condition .. equation
+            counter = counter + 1
+        end
+        where_clause = where_clause .. condition .. ")"
+        return where_clause
     end
 
     return self
 end
-
