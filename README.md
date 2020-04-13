@@ -43,9 +43,21 @@ Note, the `force_recreate` is optional and defaults to false.
 * null - Whether or not NULL value is allowed.  Defaults to false.
 * default - Default value is one isn't specified.
 
+## Select Rows
+
+```
+DBM.SelectRows(<table_name>, <fields>, <where>)
+```
+
+TODO: Not yet implemented
 
 ## Insert Row
 
+```
+DBM.InsertRow(<table_name>, <params>)
+```
+
+Example:
 ```
 DBM.InsertRow("users", { steamid = 9876543210, username = 'oweff', password = 'dontknow', age = 25 })
 
@@ -67,7 +79,11 @@ DBM.UpdateRows("users", { steamid = 9876543210 }, { age = 28, password = 'passwo
 
 ## Delete Rows
 
-## Fetch Rows
+```
+DBM.DeleteRows(<table_name>, <where>)
+```
+
+TODO: Not yet implemented
 
 # TODO
 
