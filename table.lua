@@ -6,11 +6,6 @@ function Table.new(conn, name, fields)
     self.name = name
     self.fields = fields
 
-    if DBM_DEBUG == true then
-        print("initializing schema "..name)
-        print(dump(self.fields))
-    end
-
     self.schema_exists = function()
         local query = mariadb_prepare(self.conn, "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '?' AND table_name = '?'", DBM_DATABASE, self.name)
         mariadb_query(self.conn, query, function()
@@ -20,70 +15,69 @@ function Table.new(conn, name, fields)
         end)
     end
 
+    --
+    -- DROP 
+    --
     self.drop_schema = function()
-        if DBM_DEBUG == true then
-            print("dropping schema "..self.name)
-        end
+        print("dropping schema "..self.name)
         local query = mariadb_prepare(self.conn, "DROP TABLE ?", self.name)
         mariadb_query(self.conn, query)
     end
 
+    --
+    -- CREATE 
+    --    
     self.create_schema = function(force_recreate)
         if force_recreate == true then
             self.drop_schema()
         end
 
-        if DBM_DEBUG == true then
-            print("creating table "..self.name)
-        end
+        print("creating table "..self.name)
 
         local create_query = "CREATE TABLE IF NOT EXISTS `" .. self.name .. "` \n("
-        local counter = 0
+        create_query = create_query .. "\n`id` int NOT NULL AUTO_INCREMENT,"
         local column_query
 
-        for name,opts in pairs(self.fields) do
-            column_query = "\n     `" .. name .. "` " .. GetNativeDataType(opts.type)
+        for name,field in pairs(self.fields) do
+            column_query = "\n`" .. name .. "` " .. FormatDataType(field.type)
 
-            if opts.max_length ~= nil then
-                column_query = column_query .. "(" .. opts.max_length ..")"
+            if field.max_length ~= nil then
+                column_query = column_query .. "(" .. field.max_length ..")"
+            elseif field.type == "char" then
+                -- set length if not given for char type
+                column_query = column_query .. "(255)"
             end
 
-            if opts.null == nil or opts.null == false then
+            if field.null == nil or field.null == false then
                 column_query = column_query .. " NOT NULL"
             end
 
-            if opts.default ~= nil then
-                column_query = column_query .. " DEFAULT(" .. TypeFormatDefault(opts) ..")"
+            if field.default ~= nil then
+                column_query = column_query .. " DEFAULT(" .. QuoteValue(field.default, field.type) ..")"
             end
 
-            if opts.unique ~= nil then
+            if field.unique ~= nil then
                 column_query = column_query .. " UNIQUE"
             end
 
-            if counter ~= 0 then
-                column_query = "," .. column_query
-            end
-            create_query = create_query .. column_query
-            counter = counter + 1
+            create_query = create_query .. column_query .. ","
         end
-        create_query = create_query .. "\n)"
-
-        if DBM_DEBUG == true then
-            print(create_query)
-        end
+        create_query = create_query .. "\nPRIMARY KEY (id)\n)"
 
         local query = mariadb_prepare(self.conn, create_query)
         mariadb_query(self.conn, query)
         return true
     end
 
+    --
+    -- INSERT 
+    --
     self.insert = function(params)
-        if DBM_DEBUG == true then
-            print("inserting table "..self.name)
-            print(dump(params))
-        end
+        print("inserting row "..self.name)
+        print(dump(params))
 
         local insert_query = "INSERT INTO `" .. self.name .. "` ("
+
         local counter = 0
         local values = ""
         local colname
@@ -93,7 +87,7 @@ function Table.new(conn, name, fields)
             value = params[column] or "NULL"
 
             if ValidateField(value, field) then
-                value = self.parsed_escape_value(value, field)
+                value = QuoteValue(value, field.type)
             else
                 print("Wrong type for table "..self.name.." in column "..colname)
                 return false
@@ -113,55 +107,20 @@ function Table.new(conn, name, fields)
 
         insert_query = insert_query .. ") VALUES (" .. values .. ")"
 
-        if DBM_DEBUG == true then
-            print(insert_query)
-        end
-
         local query = mariadb_prepare(self.conn, insert_query)
         local result = mariadb_query(self.conn, query)
-        return true
+        return mariadb_get_insert_id()
     end
 
+    --
+    -- UPDATE 
+    --    
     self.update = function(params)
-        if DBM_DEBUG == true then
-            print("updating table "..self.name)
-            print(dump(params))
-        end
+        print("updating row "..self.name)
+        print(dump(params))
         return true
-    end
-
-    -- Escapes value for safe SQL insertion
-    self.parsed_escape_value = function(value, field)
-        if field.type then
-            if field.type == "text" or field.type == "char" then
-                value = "'" .. mariadb_escape_string(self.conn, value) .. "'"
-            end
-        end
-        return value
     end
 
     return self
 end
 
-function GetNativeDataType(type)
-    if type == "number" then
-        return "int"
-    elseif type == "char" then
-        return "varchar"
-    else
-        return type
-    end
-end
-
-function TypeFormatDefault(opts)
-    if opts.type == "char" or opts.type == "text" then
-        return "'" .. opts.default .. "'"
-    else
-        return opts.default
-    end
-end
-
--- TODO
-function ValidateField(value, field)
-    return true
-end

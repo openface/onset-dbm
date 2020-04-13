@@ -32,14 +32,21 @@ DBM.InitTable("users", {
 })
 ```
 
-Note, `force_recreate` defaults to false if omitted.
+Note, the `force_recreate` is optional and defaults to false.
 
-TODO: document data types
+## Schema Options
+
+* type - Maps to DB datatype.  Must be one of char, text, number, or datetime.
+* max_length - Maximum length allowed for the value.
+* unique - Enforce uniqueness on this value.
+* null - Whether or not NULL value is allowed.  Defaults to false.
+* default - Default value is one isn't specified.
+
 
 ## Insert Row
 
 ```
-DBM.InsertTable("users", { username = 'nick', password = 'bill', age = 25 })
+DBM.InsertRow("users", { username = 'nick', password = 'bill', age = 25 })
 ```
 
 ## Update Row

@@ -47,18 +47,52 @@ function InitTable(name, fields, force_recreate)
 end
 AddFunctionExport("InitTable", InitTable)
 
-function InsertTable(name, params)
+function InsertRow(name, params)
     return Tables[name].insert(params)
 end
-AddFunctionExport("InsertTable", InsertTable)
+AddFunctionExport("InsertRow", InsertRow)
 
-function UpdateTable(name, params)
+function UpdateRow(name, params)
     return Tables[name].update(params)
 end
-AddFunctionExport("UpdateTable", UpdateTable)
+AddFunctionExport("UpdateRow", UpdateRow)
 
 
 --
+
+function FormatDateTime(time)
+    return os.date("%Y-%m-%d %H:%M:%S", time)
+end
+AddFunctionExport("FormatDateTime", FormatDateTime)
+
+
+function FormatDataType(type)
+    if type == "number" then
+        return "INT"
+    elseif type == "char" then
+        return "VARCHAR"
+    elseif type == "text" then
+        return "TEXT"
+    elseif type == "datetime" then
+        return "DATETIME"
+    else
+        print("Unreconized data type: "..type)
+        return type
+    end
+end
+
+function QuoteValue(value, type)
+    if type == "char" or type == "text" or type == "datetime" then
+        return "'" .. value .. "'"
+    else
+        return value
+    end
+end
+
+-- TODO
+function ValidateField(value, field)
+    return true
+end
 
 function dump(o)
    if type(o) == 'table' then
